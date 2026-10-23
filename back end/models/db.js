@@ -6,4 +6,4 @@ mongoose.connect("mongodb://127.0.0.1:27017/tal3etna")
     })
     .catch((err) => {
         console.log(err);
-    });
+    })
