@@ -7,15 +7,15 @@ const authMiddleware = require("../middleware/authMiddleware");
 const {
   createOuting,
   joinOuting,
-  addOutingOption
+  addOutingOption,
+  voteForRestaurant,
+  closeOuting
 } = require("../controllers/outingController");
-console.log("authMiddleware:", typeof authMiddleware);
-console.log("createOuting:", typeof createOuting);
-console.log("joinOuting:", typeof joinOuting);
-console.log("addOutingOption:", typeof addOutingOption);
 
 router.post("/", authMiddleware, createOuting);
 router.post("/join", authMiddleware, joinOuting);
 router.post("/:outingId/options", authMiddleware, addOutingOption);
+router.post("/:outingId/vote", authMiddleware, voteForRestaurant);
+router.patch("/:outingId/close", authMiddleware, closeOuting);
 
 module.exports = router;

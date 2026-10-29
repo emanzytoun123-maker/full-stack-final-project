@@ -263,9 +263,67 @@ const voteForRestaurant = async (req, res) => {
 };
 
 
+const closeOuting = async (req, res) => {
+  try {
+    const { outingId } = req.params;
+    const userId = req.user.userId;
+
+    const outing = await Outing.findById(outingId);
+
+    if (!outing) {
+      return res.status(404).json({
+        message: "Outing not found"
+      });
+    }
+
+    if (outing.createdBy.toString() !== userId) {
+      return res.status(403).json({
+        message: "Only the outing creator can close it"
+      });
+    }
+
+    if (outing.status === "closed") {
+      return res.status(400).json({
+        message: "Outing is already closed"
+      });
+    }
+
+    if (outing.options.length === 0) {
+      return res.status(400).json({
+        message: "Add at least one restaurant before closing"
+      });
+    }
+
+    const sortedOptions = [...outing.options].sort(
+      (a, b) => b.votes.length - a.votes.length
+    );
+
+    outing.winner = sortedOptions[0].restaurant;
+    outing.status = "closed";
+
+    await outing.save();
+
+    return res.status(200).json({
+      message: "Outing closed successfully",
+      winner: outing.winner,
+      status: outing.status,
+      outing
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not close outing"
+    });
+  }
+};
+
+
+
 module.exports = {
   createOuting,
   joinOuting,
   addOutingOption,
-  voteForRestaurant
+  voteForRestaurant,
+  closeOuting
 };
