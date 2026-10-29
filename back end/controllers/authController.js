@@ -4,29 +4,49 @@ const Restaurant = require("../models/restaurantSchema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// Register a new user
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, restaurantInfo } = req.body;
+    const { name, email, password, role, restaurantInfo } = req.body || {};
 
-    if (!name || !email || !password || !role) {
+    if (
+      typeof name !== "string" ||
+      !name.trim() ||
+      typeof email !== "string" ||
+      !email.trim() ||
+      typeof password !== "string" ||
+      !password ||
+      !role
+    ) {
       return res.status(400).json({
         message: "Please fill in all required fields"
       });
     }
 
-    if (role !== "consumer" && role !== "restaurant") {
+    if (!["consumer", "restaurant"].includes(role)) {
       return res.status(400).json({
         message: "Role must be consumer or restaurant"
       });
     }
 
-    if (role === "restaurant" && (!restaurantInfo?.name || !restaurantInfo?.city)) {
-      return res.status(400).json({
-        message: "Restaurant name and city are required"
-      });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (role === "restaurant") {
+      if (
+        typeof restaurantInfo?.name !== "string" ||
+        !restaurantInfo.name.trim() ||
+        typeof restaurantInfo?.city !== "string" ||
+        !restaurantInfo.city.trim()
+      ) {
+        return res.status(400).json({
+          message: "Restaurant name and city are required"
+        });
+      }
     }
 
-    const existingUser = await Users.findOne({ email });
+    const existingUser = await Users.findOne({
+      email: normalizedEmail
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -45,8 +65,8 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await Users.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password: hashedPassword,
       role: roleDocument._id
     });
@@ -56,8 +76,8 @@ const registerUser = async (req, res) => {
     if (role === "restaurant") {
       const newRestaurant = await Restaurant.create({
         owner: newUser._id,
-        name: restaurantInfo.name,
-        city: restaurantInfo.city,
+        name: restaurantInfo.name.trim(),
+        city: restaurantInfo.city.trim(),
         area: restaurantInfo.area,
         address: restaurantInfo.address,
         phone: restaurantInfo.phone,
@@ -67,52 +87,107 @@ const registerUser = async (req, res) => {
       restaurantId = newRestaurant._id;
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully",
       userId: newUser._id,
       role,
       restaurantId
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
-    res.status(500).json({
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "This email is already registered"
+      });
+    }
+
+    return res.status(500).json({
       message: "Something went wrong"
     });
   }
 };
-async function loginUser(req, res) {
+
+// Login
+const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
-    const user = await Users.findOne({ email });
-
-    if (!user) {
-      return res.status(401).json({ message: "Email or password is incorrect" });
+    if (
+      typeof email !== "string" ||
+      !email.trim() ||
+      typeof password !== "string" ||
+      !password
+    ) {
+      return res.status(400).json({
+        message: "Email and password are required"
+      });
     }
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await Users.findOne({
+      email: normalizedEmail
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Email or password is incorrect"
+      });
+    }
+
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!passwordMatches) {
-      return res.status(401).json({ message: "Email or password is incorrect" });
+      return res.status(401).json({
+        message: "Email or password is incorrect"
+      });
     }
 
     const roleData = await Role.findById(user.role);
-    const token = jwt.sign(
-  { userId: user._id, role: roleData.role },
-  process.env.JWT_SECRET,
-  { expiresIn: "1d" }
-);
 
-    res.status(200).json({
+    if (!roleData) {
+      return res.status(500).json({
+        message: "User role was not found"
+      });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is missing from environment variables");
+
+      return res.status(500).json({
+        message: "Authentication configuration error"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: roleData.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
       message: "Login successful",
       userId: user._id,
       role: roleData.role,
-      token,
+      token
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
+    console.error(error);
 
-module.exports = { registerUser, loginUser };
+    return res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser
+};
