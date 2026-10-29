@@ -1,9 +1,10 @@
+
 const mongoose = require("mongoose");
 const SurplusOffer = require("../models/surplusOfferSchema");
 const Restaurant = require("../models/restaurantSchema");
 const MenuItem = require("../models/menuItemSchema");
 
-// إضافة عرض فائض
+// Add a surplus offer
 const addSurplusOffer = async (req, res) => {
   try {
     if (req.user.role !== "restaurant") {
@@ -15,6 +16,9 @@ const addSurplusOffer = async (req, res) => {
     const restaurant = await Restaurant.findOne({
       owner: req.user.userId
     });
+
+    console.log("Logged-in user:", req.user.userId);
+    console.log("Found restaurant:", restaurant?._id);
 
     if (!restaurant) {
       return res.status(404).json({
@@ -29,18 +33,20 @@ const addSurplusOffer = async (req, res) => {
       pickupUntil
     } = req.body || {};
 
+    console.log("Request body:", req.body);
+    console.log("menuItem value:", menuItem);
+
     if (!mongoose.isObjectIdOrHexString(menuItem)) {
       return res.status(400).json({
         message: "A valid menu item ID is required"
       });
     }
 
-    // الصنف لازم يكون تابع لمطعم المستخدم
     const item = await MenuItem.findOne({
       _id: menuItem,
       restaurant: restaurant._id
     });
-
+console.log("Found menu item:", item);
     if (!item) {
       return res.status(404).json({
         message: "Menu item not found in your restaurant"
@@ -54,7 +60,8 @@ const addSurplusOffer = async (req, res) => {
       discountedPrice >= item.price
     ) {
       return res.status(400).json({
-        message: "Discounted price must be at least 0 and less than the original price"
+        message:
+          "Discounted price must be at least 0 and less than the original price"
       });
     }
 
@@ -94,18 +101,20 @@ const addSurplusOffer = async (req, res) => {
 
     await newOffer.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Surplus offer added successfully",
       offer: newOffer
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Add surplus offer error:", error);
+
+    return res.status(500).json({
       message: "Could not add surplus offer"
     });
   }
 };
 
-// عرض العروض المتاحة فقط
+// Get available surplus offers
 const getAvailableOffers = async (req, res) => {
   try {
     const offers = await SurplusOffer.find({
@@ -116,14 +125,17 @@ const getAvailableOffers = async (req, res) => {
       .populate("restaurant", "name city area")
       .populate("menuItem", "name description image category");
 
-    // إخفاء العرض إذا الصنف أو المطعم المرتبط فيه انحذف
-    const availableOffers = offers.filter((offer) => {
-      return offer.restaurant !== null && offer.menuItem !== null;
-    });
+    const availableOffers = offers.filter(
+      (offer) =>
+        offer.restaurant !== null &&
+        offer.menuItem !== null
+    );
 
-    res.status(200).json(availableOffers);
+    return res.status(200).json(availableOffers);
   } catch (error) {
-    res.status(500).json({
+    console.error("Get available offers error:", error);
+
+    return res.status(500).json({
       message: "Could not get surplus offers"
     });
   }

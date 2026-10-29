@@ -145,6 +145,9 @@ const updateMenuItem = async (req, res) => {
       });
     }
 
+
+
+    
     const item = await MenuItem.findOne({
       _id: itemId,
       restaurant: restaurant._id

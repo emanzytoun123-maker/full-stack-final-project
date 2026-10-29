@@ -53,4 +53,132 @@ const createReservation = async (req, res) => {
   }
 };
 
-module.exports = { createReservation };
+
+const getMyReservations = async (req, res) => {
+  try {
+    const consumerId = req.user.userId;
+
+    const reservations = await TableReservation.find({
+      consumer: consumerId
+    }).populate("restaurant", "name city");
+
+    return res.status(200).json({
+      count: reservations.length,
+      reservations
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not get reservations"
+    });
+  }
+};
+
+
+const cancelReservation = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    const consumerId = req.user.userId;
+
+    const reservation = await TableReservation.findById(reservationId);
+
+    if (!reservation) {
+      return res.status(404).json({
+        message: "Reservation not found"
+      });
+    }
+
+    if (reservation.consumer.toString() !== consumerId) {
+      return res.status(403).json({
+        message: "You can only cancel your own reservations"
+      });
+    }
+
+    if (
+      reservation.status === "cancelled" ||
+      reservation.status === "waiting"
+    ) {
+      return res.status(400).json({
+        message: "This reservation cannot be cancelled"
+      });
+    }
+
+    reservation.status = "cancelled";
+    await reservation.save();
+
+    return res.status(200).json({
+      message: "Reservation cancelled successfully",
+      reservation
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not cancel reservation"
+    });
+  }
+};
+
+const updateReservationStatus = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    const { status } = req.body;
+    const userId = req.user.userId;
+
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant owners can update reservation status"
+      });
+    }
+
+    if (!["confirmed", "cancelled"].includes(status)) {
+      return res.status(400).json({
+        message: "Status must be confirmed or cancelled"
+      });
+    }
+
+    const reservation = await TableReservation.findById(reservationId);
+
+    if (!reservation) {
+      return res.status(404).json({
+        message: "Reservation not found"
+      });
+    }
+
+    const restaurant = await Restaurant.findById(reservation.restaurant);
+
+    if (!restaurant || restaurant.owner.toString() !== userId) {
+      return res.status(403).json({
+        message: "You can only update reservations for your restaurant"
+      });
+    }
+
+    if (reservation.status !== "pending") {
+      return res.status(400).json({
+        message: "Only pending reservations can be updated"
+      });
+    }
+
+    reservation.status = status;
+    await reservation.save();
+
+    return res.status(200).json({
+      message: "Reservation status updated successfully",
+      reservation
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not update reservation status"
+    });
+  }
+};
+
+module.exports = {
+  createReservation,
+  getMyReservations,
+  cancelReservation,
+  updateReservationStatus
+};
