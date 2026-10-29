@@ -1,6 +1,8 @@
 
 const Outing = require("../models/outingSchema");
-
+const crypto = require("crypto");
+const Restaurant = require("../models/restaurantSchema");
+// Create a new outing
 const createOuting = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -14,13 +16,24 @@ const createOuting = async (req, res) => {
 
     const { title, city, date } = req.body;
 
-    if (!title || !city) {
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      typeof city !== "string" ||
+      !city.trim()
+    ) {
       return res.status(400).json({
         message: "Title and city are required"
       });
     }
 
-    const inviteCode = require("crypto")
+    if (date && Number.isNaN(new Date(date).getTime())) {
+      return res.status(400).json({
+        message: "Invalid date"
+      });
+    }
+
+    const inviteCode = crypto
       .randomBytes(4)
       .toString("hex")
       .toUpperCase();
@@ -40,10 +53,219 @@ const createOuting = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       message: "Could not create outing"
     });
   }
 };
 
-module.exports = { createOuting };
+// Join an outing using an invite code
+const joinOuting = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { inviteCode } = req.body;
+
+    if (!inviteCode || typeof inviteCode !== "string") {
+      return res.status(400).json({
+        message: "Invite code is required"
+      });
+    }
+
+    const outing = await Outing.findOne({
+      inviteCode: inviteCode.trim().toUpperCase(),
+      status: "open"
+    });
+
+    if (!outing) {
+      return res.status(404).json({
+        message: "Outing not found or already closed"
+      });
+    }
+
+    const alreadyMember = outing.members.some(
+      (member) => member.toString() === userId
+    );
+
+    if (alreadyMember) {
+      return res.status(400).json({
+        message: "You are already a member of this outing"
+      });
+    }
+
+    outing.members.push(userId);
+    await outing.save();
+
+    return res.status(200).json({
+      message: "Joined outing successfully",
+      outing
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not join outing"
+    });
+  }
+};
+
+
+const addOutingOption = async (req, res) => {
+  try {
+    const { outingId } = req.params;
+    const { restaurantId } = req.body;
+    const userId = req.user.userId;
+
+    if (!restaurantId) {
+      return res.status(400).json({
+        message: "Restaurant ID is required"
+      });
+    }
+
+    const outing = await Outing.findById(outingId);
+
+    if (!outing) {
+      return res.status(404).json({
+        message: "Outing not found"
+      });
+    }
+
+    if (outing.status !== "open") {
+      return res.status(400).json({
+        message: "This outing is closed"
+      });
+    }
+
+    const isMember = outing.members.some(
+      (member) => member.toString() === userId
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Only outing members can add restaurants"
+      });
+    }
+
+    if (!require("mongoose").isValidObjectId(restaurantId)) {
+      return res.status(400).json({
+        message: "Invalid restaurant ID"
+      });
+    }
+
+    const restaurant = await Restaurant.findById(restaurantId);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    const alreadyAdded = outing.options.some(
+      (option) => option.restaurant.toString() === restaurantId
+    );
+
+    if (alreadyAdded) {
+      return res.status(400).json({
+        message: "Restaurant already added to this outing"
+      });
+    }
+
+    outing.options.push({
+      restaurant: restaurantId,
+      votes: []
+    });
+
+    await outing.save();
+
+    return res.status(200).json({
+      message: "Restaurant added to outing successfully",
+      outing
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not add restaurant to outing"
+    });
+  }
+};
+
+
+
+const voteForRestaurant = async (req, res) => {
+  try {
+    const { outingId } = req.params;
+    const { restaurantId } = req.body;
+    const userId = req.user.userId;
+
+    if (!restaurantId) {
+      return res.status(400).json({
+        message: "Restaurant ID is required"
+      });
+    }
+
+    const outing = await Outing.findById(outingId);
+
+    if (!outing) {
+      return res.status(404).json({
+        message: "Outing not found"
+      });
+    }
+
+    if (outing.status !== "open") {
+      return res.status(400).json({
+        message: "This outing is closed"
+      });
+    }
+
+    const isMember = outing.members.some(
+      (member) => member.toString() === userId
+    );
+
+    if (!isMember) {
+      return res.status(403).json({
+        message: "Only outing members can vote"
+      });
+    }
+
+    const selectedOption = outing.options.find(
+      (option) => option.restaurant.toString() === restaurantId
+    );
+
+    if (!selectedOption) {
+      return res.status(404).json({
+        message: "Restaurant is not an option in this outing"
+      });
+    }
+
+    // Remove this user's previous vote, if any
+    outing.options.forEach((option) => {
+      option.votes = option.votes.filter(
+        (voter) => voter.toString() !== userId
+      );
+    });
+
+    selectedOption.votes.push(userId);
+
+    await outing.save();
+
+    return res.status(200).json({
+      message: "Vote submitted successfully",
+      outing
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not submit vote"
+    });
+  }
+};
+
+
+module.exports = {
+  createOuting,
+  joinOuting,
+  addOutingOption,
+  voteForRestaurant
+};
