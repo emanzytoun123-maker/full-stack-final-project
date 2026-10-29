@@ -1,7 +1,7 @@
 
 const TableReservation = require("../models/tableReservationSchema");
 const Restaurant = require("../models/restaurantSchema");
-
+const Notification = require("../models/notificationSchema");
 const createReservation = async (req, res) => {
   try {
     const consumerId = req.user.userId;
@@ -105,7 +105,14 @@ const cancelReservation = async (req, res) => {
     }
 
     reservation.status = "cancelled";
-    await reservation.save();
+await reservation.save();
+
+await Notification.create({
+  user: reservation.consumer,
+  title: "Reservation Cancelled",
+  message: "Your table reservation has been cancelled successfully.",
+  reservation: reservation._id
+});
 
     return res.status(200).json({
       message: "Reservation cancelled successfully",
@@ -161,7 +168,21 @@ const updateReservationStatus = async (req, res) => {
     }
 
     reservation.status = status;
-    await reservation.save();
+await reservation.save();
+
+console.log("Creating notification for consumer:", reservation.consumer);
+
+await Notification.create({
+  user: reservation.consumer,
+  title: status === "confirmed"
+    ? "Reservation Confirmed"
+    : "Reservation Cancelled",
+  message: status === "confirmed"
+    ? "Your table reservation has been confirmed."
+    : "Your table reservation has been cancelled by the restaurant.",
+  reservation: reservation._id
+});
+console.log("Notification created successfully");
 
     return res.status(200).json({
       message: "Reservation status updated successfully",

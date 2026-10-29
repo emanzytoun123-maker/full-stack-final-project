@@ -8,6 +8,7 @@ const orderRouter = require("./routers/orderRouter");
 const surplusOfferRouter = require("./routers/surplusOfferRouter");
 const tableReservationRouter = require("./routers/tableReservationRouter");
 const outingRouter = require("./routers/outingRouter");
+const notificationRouter = require("./routers/notificationRouter");
 const app = express();
 
 app.use(express.json());
@@ -18,7 +19,7 @@ app.use("/surplus-offers", surplusOfferRouter);
 app.use("/orders", orderRouter);
 app.use("/outings", outingRouter);
 app.use("/reservations", tableReservationRouter);
-
+app.use("/notifications", notificationRouter);
 app.get("/", (req, res) => {
   res.send("Tal3etna API is working");
 });
