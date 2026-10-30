@@ -109,3 +109,21 @@
     font-size: 25px;
   }
 }
+/* Colored card borders */
+.feature-card.blue {
+  border: 1.5px solid #bfdbfe;
+}
+
+.feature-card.orange {
+  border: 1.5px solid #fed7aa;
+}
+
+.feature-card.green {
+  border: 1.5px solid #bbf7d0;
+}
+
+/* Hover effect */
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(23, 37, 84, 0.10);
+}

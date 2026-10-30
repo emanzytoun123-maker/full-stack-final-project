@@ -3,7 +3,7 @@ import './Features.css'
 
 const features = [
   {
-    icon: '🍽️',
+    
     title: 'اكتشف المطاعم',
     description: 'تصفح المطاعم واكتشف المنيو والأسعار واختار مكانك المفضل.',
     link: '/restaurants',
@@ -11,7 +11,7 @@ const features = [
     color: 'blue',
   },
   {
-    icon: '🏷️',
+    
     title: 'عروض الطعام',
     description: 'استفيد من عروض الطعام المخفّض ووفر على طلباتك.',
     link: '/surplus-offers',
@@ -19,7 +19,7 @@ const features = [
     color: 'orange',
   },
   {
-    icon: '🥳',
+   
     title: 'خطط طلعتك',
     description: 'اجمع أصحابك واقترحوا مطاعم وصوّتوا سوا.',
     link: '/outings',
@@ -58,5 +58,8 @@ function Features() {
     </section>
   )
 }
+
+
+
 
 export default Features
