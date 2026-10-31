@@ -6,7 +6,8 @@ const {
   getRestaurants,
   getRestaurantById,
   getNearbyRestaurants,
-  updateMyRestaurant
+  updateMyRestaurant,
+  getMyRestaurant
 } = require("../controllers/restaurantController");
 
 const authMiddleware = require("../authMiddleware");
@@ -16,6 +17,9 @@ router.get("/", getRestaurants);
 
 // Get nearby restaurants
 router.get("/nearby", getNearbyRestaurants);
+
+// Get my restaurant (requires authentication)
+router.get("/my", authMiddleware, getMyRestaurant);
 
 // Get one restaurant by ID
 router.get("/:id", getRestaurantById);

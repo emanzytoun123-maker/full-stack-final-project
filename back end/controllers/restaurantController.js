@@ -277,9 +277,40 @@ const getRestaurantById = async (req, res) => {
   }
 };
 
+
+const getMyRestaurant = async (req, res) => {
+  try {
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant accounts can access this"
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      owner: req.user.userId
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    return res.status(200).json(restaurant);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not get your restaurant"
+    });
+  }
+};
+
+
 module.exports = {
   getRestaurants,
   getRestaurantById,
   getNearbyRestaurants,
-  updateMyRestaurant
+  updateMyRestaurant,
+  getMyRestaurant
 };
