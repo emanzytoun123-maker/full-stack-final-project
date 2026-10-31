@@ -330,13 +330,12 @@ const addToCart = (item) => {
                         {(item.price * item.quantity).toFixed(2)} د.أ
                       </strong>
 
-                      <button
+  <button
   className="cart-remove-btn"
   onClick={() => removeFromCart(item._id)}
   title="حذف الصنف"
-  aria-label={`حذف ${item.name}`}
 >
-  <icon name="trash-2" size="18" />
+  🗑️
 </button>
 
                     </div>
