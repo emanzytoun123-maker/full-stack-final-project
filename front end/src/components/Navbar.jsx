@@ -1,29 +1,31 @@
+import { Link } from 'react-router-dom'
 
 function Navbar() {
   return (
     <header className="navbar">
-      <a href="/" className="navbar-logo">
+      <Link to="/" className="navbar-logo">
         <span className="logo-icon">ط</span>
         <span>طلعتنا</span>
-      </a>
+      </Link>
 
       <nav className="navbar-links">
-        <a href="/">الرئيسية</a>
-        <a href="/restaurants">المطاعم</a>
-        <a href="/surplus-offers">العروض</a>
-        <a href="/outings">الطلعات</a>
+        <Link to="/">الرئيسية</Link>
+        <Link to="/restaurants">المطاعم</Link>
+        <Link to="/surplus-offers">العروض</Link>
+        <Link to="/outings">الطلعات</Link>
       </nav>
 
       <div className="navbar-actions">
-        <a href="/login" className="login-link">
+        <Link to="/login" className="login-link">
           تسجيل الدخول
-        </a>
-        <a href="/register" className="register-button">
+        </Link>
+
+        <Link to="/register" className="register-button">
           إنشاء حساب
-        </a>
+        </Link>
       </div>
     </header>
-  );
+  )
 }
 
-export default Navbar;
+export default Navbar

@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors')
 require("./models/db");
 require("dotenv").config();
 const restaurantRouter = require("./routers/restaurantRouter");
@@ -10,8 +11,11 @@ const tableReservationRouter = require("./routers/tableReservationRouter");
 const outingRouter = require("./routers/outingRouter");
 const notificationRouter = require("./routers/notificationRouter");
 const app = express();
-
+app.use(cors({
+  origin: 'http://localhost:5173'
+}))
 app.use(express.json());
+
 app.use("/users", userRouter);
 app.use("/restaurants", restaurantRouter);
 app.use("/menu-items", menuItemRouter);

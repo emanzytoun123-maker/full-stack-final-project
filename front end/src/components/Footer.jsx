@@ -1,4 +1,4 @@
-
+import { Link } from 'react-router-dom'
 import './Footer.css'
 
 function Footer() {
@@ -6,28 +6,27 @@ function Footer() {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-brand">
-          <a href="/" className="footer-logo">
+          <Link to="/" className="footer-logo">
             <span>ط</span>
             طلعتنا
-          </a>
+          </Link>
           <p>
-            اكتشف مطاعم جديدة، استفيد من العروض،
-            وخطط طلعتك الجاية مع أصحابك.
+            اكتشف مطاعم جديدة، استفيد من العروض، وخطط طلعتك الجاية مع أصحابك.
           </p>
         </div>
 
         <div className="footer-links">
           <h3>روابط سريعة</h3>
-          <a href="/">الرئيسية</a>
-          <a href="/restaurants">المطاعم</a>
-          <a href="/surplus-offers">العروض</a>
-          <a href="/outings">الطلعات</a>
+          <Link to="/">الرئيسية</Link>
+          <Link to="/restaurants">المطاعم</Link>
+          <Link to="/surplus-offers">العروض</Link>
+          <Link to="/outings">الطلعات</Link>
         </div>
 
         <div className="footer-links">
           <h3>حسابك</h3>
-          <a href="/login">تسجيل الدخول</a>
-          <a href="/register">إنشاء حساب</a>
+          <Link to="/login">تسجيل الدخول</Link>
+          <Link to="/register">إنشاء حساب</Link>
         </div>
       </div>
 

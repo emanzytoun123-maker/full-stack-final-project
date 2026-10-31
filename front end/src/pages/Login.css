@@ -83,6 +83,10 @@
   margin-top: 25px;
   margin-bottom: 0;
 }
+.auth-card {
+  border: 1.5px solid #c7d2e8;
+  box-shadow: 0 8px 24px rgba(23, 37, 84, 0.08);
+}
 
 @media (max-width: 480px) {
   .auth-card {

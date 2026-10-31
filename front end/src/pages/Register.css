@@ -18,7 +18,10 @@
   box-shadow: var(--shadow);
   text-align: center;
 }
-
+.auth-card {
+  border: 1.5px solid #c7d2e8;
+  box-shadow: 0 8px 24px rgba(23, 37, 84, 0.08);
+}
 .auth-logo {
   display: inline-block;
   font-size: 28px;
