@@ -11,7 +11,19 @@ function RestaurantDashboard() {
   const [restaurant, setRestaurant] = useState(null)
   const [menuItems, setMenuItems] = useState([])
   const [orders, setOrders] = useState([])
+  const [offerForm, setOfferForm] = useState({
+  menuItem: '',
+  discountedPrice: '',
+  quantity: '',
+  pickupUntil: ''
+})
 
+const [offerLoading, setOfferLoading] = useState(false)
+const [offerError, setOfferError] = useState('')
+const [offerSuccess, setOfferSuccess] = useState('')
+const selectedOfferItem = menuItems.find(
+  item => item._id === offerForm.menuItem
+)
   const [loading, setLoading] = useState(true)
   const [menuLoading, setMenuLoading] = useState(false)
   const [ordersLoading, setOrdersLoading] = useState(false)
@@ -366,6 +378,46 @@ function RestaurantDashboard() {
     }
 
     return actions[status]
+  }
+
+  // Add surplus offer
+  const handleAddOffer = async (e) => {
+    e.preventDefault()
+
+    const token = localStorage.getItem('token')
+
+    try {
+      setOfferLoading(true)
+      setOfferError('')
+      setOfferSuccess('')
+
+      await api.post('/surplus-offers', {
+        menuItem: offerForm.menuItem,
+        discountedPrice: Number(offerForm.discountedPrice),
+        quantity: Number(offerForm.quantity),
+        pickupUntil: new Date(offerForm.pickupUntil).toISOString()
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      setOfferSuccess('تمت إضافة العرض بنجاح! 🎉')
+
+      setOfferForm({
+        menuItem: '',
+        discountedPrice: '',
+        quantity: '',
+        pickupUntil: ''
+      })
+
+    } catch (err) {
+      setOfferError(
+        err.response?.data?.message || 'تعذر إضافة العرض، حاولي مرة ثانية.'
+      )
+    } finally {
+      setOfferLoading(false)
+    }
   }
 
   return (
@@ -989,30 +1041,133 @@ function RestaurantDashboard() {
             </section>
           )}
 
-        {/* Other Sections */}
+        {/* Surplus Offers */}
         {!loading &&
           !error &&
-          activeSection !== 'dashboard' &&
-          activeSection !== 'menu' &&
-          activeSection !== 'orders' &&
-          activeSection !== 'profile' && (
-
+          activeSection === 'offers' && (
             <section className="dashboard-content">
+              <div className="offers-management">
+                <div className="offers-header">
+                  <h2>🏷️ عروض الفائض</h2>
+                  <p>اعرضي الأصناف المتبقية بسعر مخفّض قبل انتهاء وقت الاستلام.</p>
+                </div>
 
-              <div className="dashboard-welcome">
-                <h2>
-                  {
-                    sections.find(
-                      section => section.id === activeSection
-                    )?.label
-                  }
-                </h2>
+                {offerError && (
+                  <p className="menu-error">{offerError}</p>
+                )}
 
-                <p>
-                  سنجهز هذا القسم ونربطه بالباك إند في الخطوات القادمة.
-                </p>
+                {offerSuccess && (
+                  <p className="menu-success">{offerSuccess}</p>
+                )}
+
+                <form className="offer-form" onSubmit={handleAddOffer}>
+                  <div className="offer-form-grid">
+                    <div className="offer-form-group offer-full-width">
+                      <label htmlFor="offer-menu-item">اختاري الصنف *</label>
+                      <select
+                        id="offer-menu-item"
+                        value={offerForm.menuItem}
+                        onChange={(e) => setOfferForm(prev => ({
+                          ...prev,
+                          menuItem: e.target.value,
+                          discountedPrice: ''
+                        }))}
+                        required
+                      >
+                        <option value="">اختاري صنفًا من المنيو</option>
+                        {menuItems.map(item => (
+                          <option key={item._id} value={item._id}>
+                            {item.name} — {item.price} د.أ
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedOfferItem && (
+                      <div className="offer-form-group">
+                        <label>السعر الأصلي</label>
+                        <input value={`${selectedOfferItem.price} د.أ`} disabled />
+                      </div>
+                    )}
+
+                    <div className="offer-form-group">
+                      <label htmlFor="offer-discounted-price">السعر بعد الخصم (د.أ) *</label>
+                      <input
+                        id="offer-discounted-price"
+                        type="number"
+                        min="0"
+                        max={selectedOfferItem ? selectedOfferItem.price - 0.01 : undefined}
+                        step="0.01"
+                        value={offerForm.discountedPrice}
+                        onChange={(e) => setOfferForm(prev => ({
+                          ...prev,
+                          discountedPrice: e.target.value
+                        }))}
+                        placeholder="مثلاً: 2.00"
+                        required
+                      />
+                    </div>
+
+                    <div className="offer-form-group">
+                      <label htmlFor="offer-quantity">الكمية المتوفرة *</label>
+                      <input
+                        id="offer-quantity"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={offerForm.quantity}
+                        onChange={(e) => setOfferForm(prev => ({
+                          ...prev,
+                          quantity: e.target.value
+                        }))}
+                        placeholder="مثلاً: 5"
+                        required
+                      />
+                    </div>
+
+                    <div className="offer-form-group">
+                      <label htmlFor="offer-pickup-until">آخر موعد للاستلام *</label>
+                      <input
+                        id="offer-pickup-until"
+                        type="datetime-local"
+                        min={new Date().toISOString().slice(0, 16)}
+                        value={offerForm.pickupUntil}
+                        onChange={(e) => setOfferForm(prev => ({
+                          ...prev,
+                          pickupUntil: e.target.value
+                        }))}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="offer-submit-btn"
+                    disabled={offerLoading || menuItems.length === 0}
+                  >
+                    {offerLoading ? 'جاري إضافة العرض...' : 'إضافة العرض'}
+                  </button>
+
+                  {menuItems.length === 0 && (
+                    <p className="menu-error">
+                      ما عندك أصناف بالمنيو حاليًا. أضيفي صنفًا أولًا حتى تقدري تعملي عرض.
+                    </p>
+                  )}
+                </form>
               </div>
+            </section>
+          )}
 
+        {/* Reservations */}
+        {!loading &&
+          !error &&
+          activeSection === 'reservations' && (
+            <section className="dashboard-content">
+              <div className="dashboard-welcome">
+                <h2>📅 الحجوزات</h2>
+                <p>ميزة الحجوزات لم يتم ربطها بالباك إند حتى الآن.</p>
+              </div>
             </section>
           )}
 
