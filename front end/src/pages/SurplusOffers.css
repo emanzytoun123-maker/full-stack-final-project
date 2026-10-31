@@ -199,3 +199,76 @@
 .surplus-details {
   min-height: 125px;
 }
+
+.surplus-order-controls {
+  border-top: 1px solid #e5eaf3;
+  padding-top: 15px;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.surplus-quantity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.surplus-quantity button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d9e2f0;
+  background: white;
+  color: #192b55;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.surplus-quantity button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.surplus-order-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #ff7817;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.surplus-order-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.surplus-order-success,
+.surplus-order-error {
+  padding: 14px;
+  margin: 15px 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.surplus-order-success {
+  background: #e8f8ed;
+  color: #168348;
+}
+
+.surplus-order-error {
+  background: #feecec;
+  color: #c62828;
+}
+
+.surplus-order-success button,
+.surplus-order-error button {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}

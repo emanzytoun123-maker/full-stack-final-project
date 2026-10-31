@@ -141,7 +141,45 @@ const getAvailableOffers = async (req, res) => {
   }
 };
 
+
+// Get all offers for the logged-in restaurant
+const getMyRestaurantOffers = async (req, res) => {
+  try {
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant accounts can view their offers"
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      owner: req.user.userId
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    const offers = await SurplusOffer.find({
+      restaurant: restaurant._id
+    })
+      .populate("menuItem", "name description image category")
+      .sort({ _id: -1 });
+
+    return res.status(200).json(offers);
+
+  } catch (error) {
+    console.error("Get restaurant offers error:", error);
+
+    return res.status(500).json({
+      message: "Could not get restaurant offers"
+    });
+  }
+};
+
 module.exports = {
   addSurplusOffer,
-  getAvailableOffers
+  getAvailableOffers,
+  getMyRestaurantOffers
 };
