@@ -1,0 +1,201 @@
+
+.surplus-page {
+  min-height: 100vh;
+  padding: 45px 6%;
+  background: #f4f6fb;
+  color: #192b55;
+}
+
+.surplus-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.surplus-header h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.surplus-header p {
+  color: #64748b;
+  line-height: 1.8;
+}
+
+.surplus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.surplus-card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 5px 18px rgba(25, 43, 85, 0.06);
+  transition: 0.2s;
+}
+
+.surplus-card:hover {
+  transform: translateY(-5px);
+}
+
+.surplus-image {
+  height: 190px;
+  background: #fff0e5;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.surplus-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.surplus-image > span:first-child {
+  font-size: 55px;
+}
+
+.surplus-discount {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #ff7817;
+  color: white;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.surplus-card-body {
+  padding: 20px;
+}
+
+.surplus-restaurant {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.surplus-card-body h2 {
+  font-size: 21px;
+  margin: 12px 0 8px;
+}
+
+.surplus-description {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.surplus-prices {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.surplus-prices strong {
+  color: #ff7817;
+  font-size: 21px;
+}
+
+.surplus-prices del {
+  color: #94a3b8;
+}
+
+.surplus-details {
+  border-top: 1px solid #e5eaf3;
+  padding-top: 12px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.surplus-message,
+.surplus-empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: #64748b;
+}
+
+.surplus-empty span {
+  font-size: 45px;
+}
+
+.surplus-empty h2 {
+  color: #192b55;
+}
+
+.surplus-error {
+  color: #dc2626;
+}
+
+@media (max-width: 600px) {
+  .surplus-page {
+    padding: 30px 18px;
+  }
+
+  .surplus-header h1 {
+    font-size: 26px;
+  }
+}
+.surplus-card {
+  background: #fff;
+  border: 1.5px solid #d9e2f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 5px 18px rgba(25, 43, 85, 0.07);
+  transition: 0.25s ease;
+}
+
+.surplus-card:hover {
+  transform: translateY(-5px);
+  border-color: #ff7817;
+  box-shadow: 0 8px 22px rgba(25, 43, 85, 0.12);
+}
+/* Align all offer cards */
+.surplus-grid {
+  align-items: stretch;
+}
+
+.surplus-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.surplus-image {
+  flex-shrink: 0;
+}
+
+.surplus-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.surplus-card-body h2 {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.surplus-description {
+  min-height: 42px;
+  margin: 0;
+}
+
+.surplus-prices {
+  margin-top: auto;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+}
+
+.surplus-details {
+  min-height: 125px;
+}

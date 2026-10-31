@@ -927,3 +927,173 @@
     width: 100%;
   }
 }
+/* Surplus Offers */
+.offers-management {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 5px 20px rgba(25, 43, 85, 0.04);
+  direction: rtl;
+  text-align: right;
+}
+
+.offers-management h2 {
+  color: #192b55;
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+
+.offers-management > p {
+  color: #64748b;
+  margin-bottom: 25px;
+  line-height: 1.8;
+}
+
+.offers-management .menu-form {
+  background: #f8faff;
+  border: 1px solid #e5eaf3;
+  border-radius: 16px;
+  padding: 25px;
+}
+
+.offers-management .menu-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.offers-management .menu-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.offers-management .menu-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.offers-management label {
+  color: #192b55;
+  font-weight: 600;
+}
+
+.offers-management input,
+.offers-management select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid #d8dfeb;
+  border-radius: 10px;
+  background: #fff;
+  color: #192b55;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+.offers-management input:focus,
+.offers-management select:focus {
+  border-color: #ff7817;
+  box-shadow: 0 0 0 3px rgba(255, 120, 23, 0.12);
+}
+
+.offers-management input:disabled {
+  background: #edf1f7;
+  color: #64748b;
+}
+
+.offers-management button[type="submit"] {
+  margin-top: 25px;
+  padding: 13px 30px;
+  border: none;
+  border-radius: 10px;
+  background: #ff7817;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.offers-management button[type="submit"]:hover {
+  background: #e9680b;
+  transform: translateY(-2px);
+}
+
+.offers-management button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 650px) {
+  .offers-management {
+    padding: 18px;
+  }
+
+  .offers-management .menu-form {
+    padding: 16px;
+  }
+
+  .offers-management .menu-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .offers-management .menu-form-group.full-width {
+    grid-column: auto;
+  }
+}
+.offer-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 25, 50, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.offer-success-modal {
+  background: white;
+  padding: 35px;
+  border-radius: 18px;
+  width: min(90%, 380px);
+  text-align: center;
+  direction: rtl;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+}
+
+.offer-success-icon {
+  width: 60px;
+  height: 60px;
+  background: #e8f8ed;
+  color: #20a45a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin: 0 auto 18px;
+}
+
+.offer-success-modal h3 {
+  color: #192b55;
+  margin-bottom: 10px;
+}
+
+.offer-success-modal p {
+  color: #64748b;
+  margin-bottom: 22px;
+}
+
+.offer-success-modal button {
+  background: #ff7817;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 12px 30px;
+  font-weight: bold;
+  cursor: pointer;
+}

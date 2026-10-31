@@ -8,6 +8,7 @@ import RestaurantDetails from './pages/RestaurantDetails'
 import Menu from './pages/Menu'
 import RestaurantDashboard from './pages/RestaurantDashboard'
 import MyOrders from './pages/MyOrders'
+import SurplusOffers from './pages/SurplusOffers'
 import './App.css'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Route path="/restaurants/:id/menu" element={<Menu />} />
       <Route path="/restaurant/dashboard" element={<RestaurantDashboard />} />
       <Route path="/my-orders" element={<MyOrders />} />
+      <Route path="/surplus-offers" element={<SurplusOffers />} />
     </Routes>
   )
 }

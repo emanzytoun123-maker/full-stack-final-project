@@ -1049,7 +1049,7 @@ const selectedOfferItem = menuItems.find(
               <div className="offers-management">
                 <div className="offers-header">
                   <h2>🏷️ عروض الفائض</h2>
-                  <p>اعرضي الأصناف المتبقية بسعر مخفّض قبل انتهاء وقت الاستلام.</p>
+                  <p>اعرض الأصناف المتبقية بسعر مخفّض قبل انتهاء وقت الاستلام.</p>
                 </div>
 
                 {offerError && (
@@ -1057,13 +1057,22 @@ const selectedOfferItem = menuItems.find(
                 )}
 
                 {offerSuccess && (
-                  <p className="menu-success">{offerSuccess}</p>
-                )}
+  <div className="offer-success-overlay">
+    <div className="offer-success-modal">
+      <div className="offer-success-icon">✓</div>
+      <h3>تمت إضافة العرض بنجاح!</h3>
+      <p>عرضك صار جاهزًا.</p>
+      <button onClick={() => setOfferSuccess('')}>
+        تمام
+      </button>
+    </div>
+  </div>
+)}
 
                 <form className="offer-form" onSubmit={handleAddOffer}>
                   <div className="offer-form-grid">
                     <div className="offer-form-group offer-full-width">
-                      <label htmlFor="offer-menu-item">اختاري الصنف *</label>
+                      <label htmlFor="offer-menu-item">اختار الصنف *</label>
                       <select
                         id="offer-menu-item"
                         value={offerForm.menuItem}
@@ -1074,7 +1083,7 @@ const selectedOfferItem = menuItems.find(
                         }))}
                         required
                       >
-                        <option value="">اختاري صنفًا من المنيو</option>
+                        <option value="">اختار صنفًا من المنيو</option>
                         {menuItems.map(item => (
                           <option key={item._id} value={item._id}>
                             {item.name} — {item.price} د.أ
@@ -1151,7 +1160,7 @@ const selectedOfferItem = menuItems.find(
 
                   {menuItems.length === 0 && (
                     <p className="menu-error">
-                      ما عندك أصناف بالمنيو حاليًا. أضيفي صنفًا أولًا حتى تقدري تعملي عرض.
+                      ما عندك أصناف بالمنيو حاليًا. أضف صنفًا أولًا حتى تقدر تعمل عرض.
                     </p>
                   )}
                 </form>
@@ -1185,7 +1194,7 @@ const selectedOfferItem = menuItems.find(
               <h2>تأكيد الحذف</h2>
 
               <p>
-                متأكدة إنك بدك تحذفي هذا الصنف؟
+                متأكد إنك بدك تحذف هذا الصنف؟
               </p>
 
               <div className="delete-modal-actions">
