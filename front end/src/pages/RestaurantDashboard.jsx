@@ -1269,9 +1269,21 @@ const handleDeleteOffer = async () => {
                     className="offer-submit-btn"
                     disabled={offerLoading || menuItems.length === 0}
                   >
-                    {offerLoading ? 'جاري إضافة العرض...' : 'إضافة العرض'}
+                    {offerLoading
+  ? 'جاري الحفظ...'
+  : editingOfferId
+    ? 'حفظ التعديلات'
+    : 'إضافة العرض'}
                   </button>
-
+                  {editingOfferId && (
+  <button
+    type="button"
+    className="menu-cancel-btn"
+    onClick={cancelOfferEdit}
+  >
+    إلغاء التعديل
+  </button>
+)}
                   {menuItems.length === 0 && (
                     <p className="menu-error">
                       ما عندك أصناف بالمنيو حاليًا. أضف صنفًا أولًا حتى تقدر تعمل عرض.
@@ -1340,6 +1352,8 @@ const handleDeleteOffer = async () => {
             </section>
           )}
 
+
+
         {/* Reservations */}
         {!loading &&
           !error &&
@@ -1351,6 +1365,38 @@ const handleDeleteOffer = async () => {
               </div>
             </section>
           )}
+{/* Offer Delete Confirmation Modal */}
+{showOfferDeleteModal && (
+  <div className="delete-modal-overlay">
+    <div className="delete-modal">
+      <div className="delete-modal-icon">🗑️</div>
+
+      <h2>تأكيد حذف العرض</h2>
+
+      <p>متأكد إنك بدك تحذف هذا العرض؟</p>
+
+      <div className="delete-modal-actions">
+        <button
+          className="delete-confirm-btn"
+          onClick={handleDeleteOffer}
+        >
+          نعم، احذف
+        </button>
+
+        <button
+          className="delete-cancel-btn"
+          onClick={() => {
+            setShowOfferDeleteModal(false)
+            setSelectedOfferId(null)
+          }}
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
         {/* Custom Delete Confirmation Modal */}
         {showDeleteModal && (
