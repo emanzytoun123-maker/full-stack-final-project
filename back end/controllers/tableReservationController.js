@@ -75,6 +75,44 @@ const getMyReservations = async (req, res) => {
   }
 };
 
+const getRestaurantReservations = async (req, res) => {
+  try {
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant accounts can view reservations"
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      owner: req.user.userId
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    const reservations = await TableReservation.find({
+      restaurant: restaurant._id
+    })
+      .populate("consumer", "name")
+      .sort({ date: -1 });
+
+    return res.status(200).json({
+      count: reservations.length,
+      reservations
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not get restaurant reservations"
+    });
+  }
+};
+
 
 const cancelReservation = async (req, res) => {
   try {
@@ -201,5 +239,6 @@ module.exports = {
   createReservation,
   getMyReservations,
   cancelReservation,
+  getRestaurantReservations,
   updateReservationStatus
 };
