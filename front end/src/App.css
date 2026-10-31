@@ -167,3 +167,22 @@ a {
     margin-top: 45px;
   }
 }
+header.navbar .navbar-actions button.login-link {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
+  border: none !important;
+  outline: none;
+  box-shadow: none !important;
+  color: #334155;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+header.navbar .navbar-actions button.login-link:hover {
+  color: #f97316;
+}
