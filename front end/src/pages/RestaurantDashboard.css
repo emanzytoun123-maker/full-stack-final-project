@@ -1097,3 +1097,85 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+/* Surplus Offers Management */
+
+.existing-offers {
+  margin-top: 35px;
+  padding-top: 25px;
+  border-top: 1px solid #e5eaf3;
+}
+
+.existing-offers h2 {
+  color: #192b55;
+  font-size: 23px;
+  margin-bottom: 22px;
+}
+
+.offers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.offer-card {
+  background: #ffffff;
+  border: 1px solid #e1e7f0;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 4px 14px rgba(25, 43, 85, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(25, 43, 85, 0.1);
+}
+
+.offer-card h3 {
+  color: #192b55;
+  font-size: 19px;
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.offer-card p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 12px 0;
+  line-height: 1.7;
+}
+
+.offer-card p:nth-of-type(2) {
+  color: #f47716;
+  font-weight: bold;
+}
+
+.offer-card p:last-child {
+  display: inline-block;
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: #e9f8ef;
+  color: #16834b;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.existing-offers > p {
+  color: #718096;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .offers-list {
+    grid-template-columns: 1fr;
+  }
+
+  .offer-card {
+    padding: 18px;
+  }
+}

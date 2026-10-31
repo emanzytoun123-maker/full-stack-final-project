@@ -21,6 +21,11 @@ function RestaurantDashboard() {
 const [offerLoading, setOfferLoading] = useState(false)
 const [offerError, setOfferError] = useState('')
 const [offerSuccess, setOfferSuccess] = useState('')
+const [offers, setOffers] = useState([])
+const [offersLoading, setOffersLoading] = useState(false)
+const [editingOfferId, setEditingOfferId] = useState(null)
+const [selectedOfferId, setSelectedOfferId] = useState(null)
+const [showOfferDeleteModal, setShowOfferDeleteModal] = useState(false)
 const selectedOfferItem = menuItems.find(
   item => item._id === offerForm.menuItem
 )
@@ -115,6 +120,23 @@ const selectedOfferItem = menuItems.find(
       setOrdersLoading(false)
     }
   }
+  // Fetch restaurant surplus offers
+const fetchOffers = async () => {
+  try {
+    setOffersLoading(true)
+    setOfferError('')
+
+    const response = await api.get('/surplus-offers/my', authConfig)
+
+    setOffers(response.data)
+  } catch (err) {
+    setOfferError(
+      err.response?.data?.message || 'تعذر تحميل العروض.'
+    )
+  } finally {
+    setOffersLoading(false)
+  }
+}
 
   // Update order status
   const handleOrderStatus = async (orderId, status) => {
@@ -201,7 +223,11 @@ const selectedOfferItem = menuItems.find(
 
     if (section === 'orders') {
       fetchOrders()
+
     }
+    if (section === 'offers') {
+  fetchOffers()
+}
   }
 
   // Reset menu form
@@ -381,44 +407,129 @@ const selectedOfferItem = menuItems.find(
   }
 
   // Add surplus offer
-  const handleAddOffer = async (e) => {
-    e.preventDefault()
+  
 
-    const token = localStorage.getItem('token')
+const handleAddOffer = async (e) => {
+  e.preventDefault()
 
-    try {
-      setOfferLoading(true)
-      setOfferError('')
-      setOfferSuccess('')
+  try {
+    setOfferLoading(true)
+    setOfferError('')
+    setOfferSuccess('')
 
-      await api.post('/surplus-offers', {
-        menuItem: offerForm.menuItem,
-        discountedPrice: Number(offerForm.discountedPrice),
-        quantity: Number(offerForm.quantity),
-        pickupUntil: new Date(offerForm.pickupUntil).toISOString()
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+    const offerData = {
+      menuItem: offerForm.menuItem,
+      discountedPrice: Number(offerForm.discountedPrice),
+      quantity: Number(offerForm.quantity),
+      pickupUntil: new Date(offerForm.pickupUntil).toISOString()
+    }
+
+    if (editingOfferId) {
+      await api.patch(
+        `/surplus-offers/${editingOfferId}`,
+        {
+          discountedPrice: offerData.discountedPrice,
+          quantity: offerData.quantity,
+          pickupUntil: offerData.pickupUntil
+        },
+        authConfig
+      )
+
+      setOfferSuccess('تم تعديل العرض بنجاح! 🎉')
+    } else {
+      await api.post(
+        '/surplus-offers',
+        offerData,
+        authConfig
+      )
 
       setOfferSuccess('تمت إضافة العرض بنجاح! 🎉')
-
-      setOfferForm({
-        menuItem: '',
-        discountedPrice: '',
-        quantity: '',
-        pickupUntil: ''
-      })
-
-    } catch (err) {
-      setOfferError(
-        err.response?.data?.message || 'تعذر إضافة العرض، حاولي مرة ثانية.'
-      )
-    } finally {
-      setOfferLoading(false)
     }
+
+    setOfferForm({
+      menuItem: '',
+      discountedPrice: '',
+      quantity: '',
+      pickupUntil: ''
+    })
+
+    setEditingOfferId(null)
+
+    await fetchOffers()
+
+  } catch (err) {
+    setOfferError(
+      err.response?.data?.message ||
+      'تعذر حفظ العرض، حاولي مرة ثانية.'
+    )
+  } finally {
+    setOfferLoading(false)
   }
+}
+// Edit surplus offer
+const handleEditOffer = (offer) => {
+  const pickupDate = new Date(offer.pickupUntil)
+
+  const localDate = new Date(
+    pickupDate.getTime() -
+    pickupDate.getTimezoneOffset() * 60000
+  ).toISOString().slice(0, 16)
+
+  setOfferForm({
+    menuItem: offer.menuItem?._id || '',
+    discountedPrice: offer.discountedPrice,
+    quantity: offer.quantity,
+    pickupUntil: localDate
+  })
+
+  setEditingOfferId(offer._id)
+  setOfferError('')
+  setOfferSuccess('')
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+// Cancel offer editing
+const cancelOfferEdit = () => {
+  setEditingOfferId(null)
+
+  setOfferForm({
+    menuItem: '',
+    discountedPrice: '',
+    quantity: '',
+    pickupUntil: ''
+  })
+
+  setOfferError('')
+}
+// Delete surplus offer
+const handleDeleteOffer = async () => {
+  try {
+    setOfferError('')
+
+    await api.delete(
+      `/surplus-offers/${selectedOfferId}`,
+      authConfig
+    )
+
+    setShowOfferDeleteModal(false)
+    setSelectedOfferId(null)
+
+    await fetchOffers()
+
+    setOfferSuccess('تم حذف العرض بنجاح! 🎉')
+
+  } catch (err) {
+    setOfferError(
+      err.response?.data?.message || 'تعذر حذف العرض.'
+    )
+
+    setShowOfferDeleteModal(false)
+  }
+}
 
   return (
     <div className="dashboard-layout">
@@ -1036,6 +1147,9 @@ const selectedOfferItem = menuItems.find(
 
                 </form>
 
+
+
+
               </div>
 
             </section>
@@ -1164,6 +1278,64 @@ const selectedOfferItem = menuItems.find(
                     </p>
                   )}
                 </form>
+
+
+
+{/* Existing Offers */}
+<div className="existing-offers">
+  <h2>عروضي الحالية 🏷️</h2>
+
+  {offersLoading ? (
+    <p>جاري تحميل العروض...</p>
+  ) : offers.length === 0 ? (
+    <p>ما عندك عروض حاليًا.</p>
+  ) : (
+    <div className="offers-list">
+      {offers.map(offer => (
+        <div className="offer-card" key={offer._id}>
+          <h3>{offer.menuItem?.name || 'صنف محذوف'}</h3>
+          <p>السعر الأصلي: {offer.originalPrice} د.أ</p>
+          <p>السعر بعد الخصم: {offer.discountedPrice} د.أ</p>
+          <p>الكمية الأصلية: {offer.quantity}</p>
+          <p>الكمية المتبقية: {offer.remainingQuantity}</p>
+          <p>
+            موعد الاستلام: {new Date(offer.pickupUntil).toLocaleString('ar-JO')}
+          </p>
+          <p>
+            الحالة: {offer.status === 'active' ? 'نشط' : offer.status === 'soldOut' ? 'نفدت الكمية' : 'منتهي'}
+          </p>
+
+
+<div className="offer-card-actions">
+  <button
+    className="offer-edit-btn"
+    onClick={() => handleEditOffer(offer)}
+  >
+    ✏️ تعديل
+  </button>
+
+  <button
+    className="offer-delete-btn"
+    onClick={() => {
+      setSelectedOfferId(offer._id)
+      setShowOfferDeleteModal(true)
+    }}
+  >
+    🗑️ حذف
+  </button>
+</div>
+</div>
+
+
+     
+      ))}
+    </div>
+  )}
+</div>
+
+
+
+                
               </div>
             </section>
           )}

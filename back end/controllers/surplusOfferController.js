@@ -178,8 +178,167 @@ const getMyRestaurantOffers = async (req, res) => {
   }
 };
 
+
+// Delete a surplus offer
+const deleteSurplusOffer = async (req, res) => {
+  try {
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant accounts can delete offers"
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      owner: req.user.userId
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    const { offerId } = req.params;
+
+    if (!mongoose.isObjectIdOrHexString(offerId)) {
+      return res.status(400).json({
+        message: "Invalid offer ID"
+      });
+    }
+
+    const offer = await SurplusOffer.findOneAndDelete({
+      _id: offerId,
+      restaurant: restaurant._id
+    });
+
+    if (!offer) {
+      return res.status(404).json({
+        message: "Offer not found"
+      });
+    }
+
+    return res.status(200).json({
+      message: "Offer deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("Delete surplus offer error:", error);
+
+    return res.status(500).json({
+      message: "Could not delete surplus offer"
+    });
+  }
+};
+
+// Update a surplus offer
+const updateSurplusOffer = async (req, res) => {
+  try {
+    if (req.user.role !== "restaurant") {
+      return res.status(403).json({
+        message: "Only restaurant accounts can update offers"
+      });
+    }
+
+    const restaurant = await Restaurant.findOne({
+      owner: req.user.userId
+    });
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    const { offerId } = req.params;
+    const { discountedPrice, quantity, pickupUntil } = req.body || {};
+
+    if (!mongoose.isObjectIdOrHexString(offerId)) {
+      return res.status(400).json({
+        message: "Invalid offer ID"
+      });
+    }
+
+    const offer = await SurplusOffer.findOne({
+      _id: offerId,
+      restaurant: restaurant._id
+    });
+
+    if (!offer) {
+      return res.status(404).json({
+        message: "Offer not found"
+      });
+    }
+
+    if (
+      typeof discountedPrice !== "number" ||
+      !Number.isFinite(discountedPrice) ||
+      discountedPrice < 0 ||
+      discountedPrice >= offer.originalPrice
+    ) {
+      return res.status(400).json({
+        message: "Discounted price must be less than the original price"
+      });
+    }
+
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+      return res.status(400).json({
+        message: "Quantity must be a positive whole number"
+      });
+    }
+
+    const soldQuantity = offer.quantity - offer.remainingQuantity;
+
+    if (quantity < soldQuantity) {
+      return res.status(400).json({
+        message: "Quantity cannot be less than the quantity already sold"
+      });
+    }
+
+    if (typeof pickupUntil !== "string") {
+      return res.status(400).json({
+        message: "Pickup deadline is required"
+      });
+    }
+
+    const pickupDate = new Date(pickupUntil);
+
+    if (
+      Number.isNaN(pickupDate.getTime()) ||
+      pickupDate.getTime() <= Date.now()
+    ) {
+      return res.status(400).json({
+        message: "Pickup deadline must be a valid future date"
+      });
+    }
+
+    offer.discountedPrice = discountedPrice;
+    offer.quantity = quantity;
+    offer.remainingQuantity = quantity - soldQuantity;
+    offer.pickupUntil = pickupDate;
+    offer.status = offer.remainingQuantity === 0
+      ? "soldOut"
+      : "active";
+
+    await offer.save();
+
+    return res.status(200).json({
+      message: "Offer updated successfully",
+      offer
+    });
+
+  } catch (error) {
+    console.error("Update surplus offer error:", error);
+
+    return res.status(500).json({
+      message: "Could not update surplus offer"
+    });
+  }
+};
+
 module.exports = {
   addSurplusOffer,
   getAvailableOffers,
-  getMyRestaurantOffers
+  getMyRestaurantOffers,
+  deleteSurplusOffer,
+  updateSurplusOffer
 };
