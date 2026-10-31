@@ -11,6 +11,12 @@ function RestaurantDetails() {
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [reservationDate, setReservationDate] = useState('')
+const [reservationTime, setReservationTime] = useState('')
+const [peopleCount, setPeopleCount] = useState(2)
+const [reservationLoading, setReservationLoading] = useState(false)
+const [reservationMessage, setReservationMessage] = useState('')
+const [reservationError, setReservationError] = useState('')
 
   useEffect(() => {
     async function fetchRestaurant() {
@@ -40,6 +46,57 @@ function RestaurantDetails() {
   }
 
   const crowd = crowdInfo[restaurant?.crowdLevel] || crowdInfo.low
+
+const handleReservation = async (e) => {
+  e.preventDefault()
+
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    setReservationError('سجّلي دخولك أولًا حتى تقدري تحجزي.')
+    return
+  }
+
+  if (localStorage.getItem('role') !== 'consumer') {
+    setReservationError('الحجز متاح لحسابات المستخدمين فقط.')
+    return
+  }
+
+  try {
+    setReservationLoading(true)
+    setReservationError('')
+    setReservationMessage('')
+
+    await api.post(
+      '/reservations',
+      {
+        restaurantId: id,
+        date: reservationDate,
+        time: reservationTime,
+        peopleCount: Number(peopleCount)
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    setReservationMessage('تم إرسال طلب الحجز بنجاح! 🎉')
+
+    setReservationDate('')
+    setReservationTime('')
+    setPeopleCount(2)
+
+  } catch (err) {
+    setReservationError(
+      err.response?.data?.message || 'تعذر إرسال الحجز، حاولي مرة ثانية.'
+    )
+  } finally {
+    setReservationLoading(false)
+  }
+}
+
 
   return (
     <>
