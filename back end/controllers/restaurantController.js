@@ -248,9 +248,38 @@ const updateMyRestaurant = async (req, res) => {
   }
 };
 
+// Get one restaurant by ID
+const getRestaurantById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!require("mongoose").Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid restaurant ID"
+      });
+    }
+
+    const restaurant = await Restaurant.findById(id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        message: "Restaurant not found"
+      });
+    }
+
+    return res.status(200).json(restaurant);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Could not get restaurant"
+    });
+  }
+};
 
 module.exports = {
   getRestaurants,
+  getRestaurantById,
   getNearbyRestaurants,
   updateMyRestaurant
 };
