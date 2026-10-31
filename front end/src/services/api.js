@@ -9,4 +9,15 @@ export const getRestaurants = async () => {
   return response.data
 }
 
+export const getNearbyRestaurants = async (latitude, longitude) => {
+  const response = await api.get('/restaurants/nearby', {
+    params: {
+      latitude,
+      longitude
+    }
+  })
+
+  return response.data
+}
+
 export default api

@@ -1,16 +1,20 @@
+
 import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import { getRestaurants } from '../services/api'
+import { getRestaurants, getNearbyRestaurants } from '../services/api'
 import { Link } from 'react-router-dom'
 import './Restaurants.css'
 
 function Restaurants() {
   const [restaurants, setRestaurants] = useState([])
+  const [nearbyRestaurants, setNearbyRestaurants] = useState(null)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('الكل')
   const [loading, setLoading] = useState(true)
+  const [loadingNearby, setLoadingNearby] = useState(false)
   const [error, setError] = useState('')
+  const [locationError, setLocationError] = useState('')
 
   useEffect(() => {
     async function fetchRestaurants() {
@@ -27,7 +31,45 @@ function Restaurants() {
     fetchRestaurants()
   }, [])
 
-  const filteredRestaurants = restaurants.filter((restaurant) => {
+  const handleNearbyRestaurants = () => {
+    if (nearbyRestaurants !== null) {
+      setNearbyRestaurants(null)
+      setLocationError('')
+      return
+    }
+
+    if (!navigator.geolocation) {
+      setLocationError('المتصفح لا يدعم تحديد الموقع.')
+      return
+    }
+
+    setLoadingNearby(true)
+    setLocationError('')
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords
+
+          const data = await getNearbyRestaurants(latitude, longitude)
+
+          setNearbyRestaurants(data)
+        } catch (err) {
+          setLocationError('تعذر تحميل المطاعم القريبة. حاولي مرة ثانية.')
+        } finally {
+          setLoadingNearby(false)
+        }
+      },
+      () => {
+        setLocationError('لم يتم السماح بالوصول للموقع. ما زالت كل المطاعم ظاهرة.')
+        setLoadingNearby(false)
+      }
+    )
+  }
+
+  const displayedRestaurants = nearbyRestaurants ?? restaurants
+
+  const filteredRestaurants = displayedRestaurants.filter((restaurant) => {
     return restaurant.name.toLowerCase().includes(search.toLowerCase())
   })
 
@@ -49,6 +91,21 @@ function Restaurants() {
             onChange={(e) => setSearch(e.target.value)}
           />
 
+          <button
+  className="location-btn"
+  type="button"
+  onClick={handleNearbyRestaurants}
+  disabled={loadingNearby}
+>
+  {loadingNearby
+    ? 'جاري تحديد موقعك...'
+    : nearbyRestaurants !== null
+      ? 'عرض كل المطاعم'
+      : '📍 المطاعم القريبة مني'}
+</button>
+
+          {locationError && <p>{locationError}</p>}
+
           <div className="category-buttons">
             {['الكل', 'وجبات سريعة', 'بيتزا', 'برغر', 'حلويات'].map((item) => (
               <button
@@ -63,7 +120,11 @@ function Restaurants() {
         </div>
 
         <div className="restaurants-results">
-          <h2>المطاعم</h2>
+          <h2>
+            {nearbyRestaurants !== null
+              ? 'المطاعم القريبة منك'
+              : 'كل المطاعم'}
+          </h2>
 
           {loading && <p>جاري تحميل المطاعم...</p>}
 
@@ -76,24 +137,28 @@ function Restaurants() {
           <div className="restaurants-grid">
             {filteredRestaurants.map((restaurant) => (
               <Link
-  to={`/restaurants/${restaurant._id}`}
-  className="restaurant-card"
-  key={restaurant._id}
->
-  <div className="restaurant-card-icon">🍽️</div>
+                to={`/restaurants/${restaurant._id}`}
+                className="restaurant-card"
+                key={restaurant._id}
+              >
+                <div className="restaurant-card-icon">🍽️</div>
 
-  <h3>{restaurant.name}</h3>
+                <h3>{restaurant.name}</h3>
 
-  <p>📍 {restaurant.city}</p>
+                <p>📍 {restaurant.city}</p>
 
-  <p>
-    {restaurant.crowdLevel === 'high' ? '🔴 مزدحم' : '🟢 غير مزدحم'}
-  </p>
+                <p>
+                  {restaurant.crowdLevel === 'high'
+                    ? '🔴 مزدحم'
+                    : '🟢 غير مزدحم'}
+                </p>
 
-  <p>⏱️ وقت الانتظار: {restaurant.waitTimeMinutes} دقيقة</p>
+                <p>⏱️ وقت الانتظار: {restaurant.waitTimeMinutes} دقيقة</p>
 
-  <span className="restaurant-details-btn">عرض المطعم ←</span>
-</Link>
+                <span className="restaurant-details-btn">
+                  عرض المطعم ←
+                </span>
+              </Link>
             ))}
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 const Users = require("../models/usersSchema");
 const Role = require("../models/roleSchema");
 const Restaurant = require("../models/restaurantSchema");
@@ -42,6 +43,23 @@ const registerUser = async (req, res) => {
           message: "Restaurant name and city are required"
         });
       }
+
+      const { latitude, longitude } = restaurantInfo || {};
+
+      if (
+        typeof latitude !== "number" ||
+        !Number.isFinite(latitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        typeof longitude !== "number" ||
+        !Number.isFinite(longitude) ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
+        return res.status(400).json({
+          message: "Valid latitude and longitude are required"
+        });
+      }
     }
 
     const existingUser = await Users.findOne({
@@ -81,7 +99,14 @@ const registerUser = async (req, res) => {
         area: restaurantInfo.area,
         address: restaurantInfo.address,
         phone: restaurantInfo.phone,
-        description: restaurantInfo.description
+        description: restaurantInfo.description,
+        location: {
+          type: "Point",
+          coordinates: [
+            restaurantInfo.longitude,
+            restaurantInfo.latitude
+          ]
+        }
       });
 
       restaurantId = newRestaurant._id;
