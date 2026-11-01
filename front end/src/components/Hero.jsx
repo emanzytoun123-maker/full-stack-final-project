@@ -22,14 +22,10 @@ function Hero() {
         </p>
 
         <div className="hero-buttons">
-          <a href="/restaurants" className="hero-primary-btn">
-            اكتشف المطاعم ←
-          </a>
-
-          <a href="/outings" className="hero-secondary-btn">
-            خطط طلعتك
-          </a>
-        </div>
+  <a href="/restaurants" className="hero-primary-btn">
+    اكتشف المطاعم ←
+  </a>
+</div>
 
         <div className="hero-note">
           <span>✓</span>

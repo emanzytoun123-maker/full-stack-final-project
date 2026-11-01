@@ -27,11 +27,14 @@ function Navbar() {
         <Link to="/">الرئيسية</Link>
         <Link to="/restaurants">المطاعم</Link>
         <Link to="/surplus-offers">العروض</Link>
-        <Link to="/outings">الطلعات</Link>
+       
 
-        {isLoggedIn && role === 'consumer' && (
-          <Link to="/my-orders">طلباتي</Link>
-        )}
+       {isLoggedIn && role === 'consumer' && (
+  <>
+    <Link to="/my-orders">طلباتي</Link>
+    <Link to="/my-reservations">حجوزاتي</Link>
+  </>
+)}
 
         {isLoggedIn && role === 'restaurant' && (
           <Link to="/restaurant/dashboard">لوحة المطعم</Link>
