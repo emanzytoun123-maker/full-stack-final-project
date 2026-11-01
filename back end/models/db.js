@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://127.0.0.1:27017/tal3etna?replicaSet=rs0&directConnection=true")
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("Database is ready to use");
     })
     .catch((err) => {
-        console.log(err);
-    })
+        console.log("Database connection error:", err);
+    });

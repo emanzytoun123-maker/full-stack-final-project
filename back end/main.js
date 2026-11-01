@@ -1,6 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require('cors')
 require("./models/db");
+
 require("dotenv").config();
 const restaurantRouter = require("./routers/restaurantRouter");
 const menuItemRouter = require("./routers/menuItemRouter");
