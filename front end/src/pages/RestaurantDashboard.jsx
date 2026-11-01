@@ -22,6 +22,9 @@ const [offerLoading, setOfferLoading] = useState(false)
 const [offerError, setOfferError] = useState('')
 const [offerSuccess, setOfferSuccess] = useState('')
 const [offers, setOffers] = useState([])
+const [reservations, setReservations] = useState([])
+const [reservationsLoading, setReservationsLoading] = useState(false)
+const [reservationsError, setReservationsError] = useState('')
 const [offersLoading, setOffersLoading] = useState(false)
 const [editingOfferId, setEditingOfferId] = useState(null)
 const [selectedOfferId, setSelectedOfferId] = useState(null)
@@ -120,6 +123,28 @@ const selectedOfferItem = menuItems.find(
       setOrdersLoading(false)
     }
   }
+
+// Fetch restaurant reservations
+const fetchReservations = async () => {
+  try {
+    setReservationsLoading(true)
+    setReservationsError('')
+
+    const response = await api.get(
+      '/reservations/restaurant',
+      authConfig
+    )
+
+    setReservations(response.data.reservations)
+  } catch (err) {
+    setReservationsError(
+      err.response?.data?.message || 'تعذر تحميل الحجوزات.'
+    )
+  } finally {
+    setReservationsLoading(false)
+  }
+}
+
   // Fetch restaurant surplus offers
 const fetchOffers = async () => {
   try {
@@ -228,6 +253,11 @@ const fetchOffers = async () => {
     if (section === 'offers') {
   fetchOffers()
 }
+
+if (section === 'reservations') {
+  fetchReservations()
+}
+
   }
 
   // Reset menu form
@@ -528,6 +558,32 @@ const handleDeleteOffer = async () => {
     )
 
     setShowOfferDeleteModal(false)
+  }
+}
+
+// Update reservation status
+const handleReservationStatus = async (reservationId, status) => {
+  try {
+    setReservationsError('')
+
+    await api.patch(
+      `/reservations/${reservationId}/status`,
+      { status },
+      authConfig
+    )
+
+    await fetchReservations()
+
+    setSuccess(
+      status === 'confirmed'
+        ? 'تم قبول الحجز بنجاح! 🎉'
+        : 'تم رفض الحجز بنجاح.'
+    )
+
+  } catch (err) {
+    setReservationsError(
+      err.response?.data?.message || 'تعذر تحديث حالة الحجز.'
+    )
   }
 }
 
@@ -1354,17 +1410,67 @@ const handleDeleteOffer = async () => {
 
 
 
-        {/* Reservations */}
-        {!loading &&
-          !error &&
-          activeSection === 'reservations' && (
-            <section className="dashboard-content">
-              <div className="dashboard-welcome">
-                <h2>📅 الحجوزات</h2>
-                <p>ميزة الحجوزات لم يتم ربطها بالباك إند حتى الآن.</p>
-              </div>
-            </section>
-          )}
+       
+{/* Reservations */}
+{!loading && !error && activeSection === 'reservations' && (
+  <section className="dashboard-content">
+    <div className="dashboard-welcome">
+      <h2>📅 حجوزات المطعم</h2>
+      <p>تابعي حجوزات الزبائن وحالتها.</p>
+    </div>
+
+    {reservationsLoading ? (
+      <p>جاري تحميل الحجوزات...</p>
+    ) : reservationsError ? (
+      <p className="menu-error">{reservationsError}</p>
+    ) : reservations.length === 0 ? (
+      <p>ما في حجوزات حاليًا.</p>
+    ) : (
+      <div className="offers-list">
+        {reservations.map(reservation => (
+          <div className="offer-card" key={reservation._id}>
+            <h3>👤 {reservation.consumer?.name || 'زبون'}</h3>
+
+            <p>
+              📅 التاريخ: {new Date(reservation.date).toLocaleDateString('ar-JO')}
+            </p>
+
+            <p>🕒 الوقت: {reservation.time}</p>
+            <p>👥 عدد الأشخاص: {reservation.peopleCount}</p>
+
+            <p>
+              الحالة: {
+                reservation.status === 'pending' ? 'قيد الانتظار' :
+                reservation.status === 'confirmed' ? 'مؤكد' :
+                reservation.status === 'cancelled' ? 'ملغي' :
+                'قائمة الانتظار'
+              }
+            </p>
+{reservation.status === 'pending' && (
+  <div className="reservation-actions">
+    <button
+      className="reservation-confirm-btn"
+      onClick={() => handleReservationStatus(reservation._id, 'confirmed')}
+    >
+      ✓ قبول الحجز
+    </button>
+
+    <button
+      className="reservation-reject-btn"
+      onClick={() => handleReservationStatus(reservation._id, 'cancelled')}
+    >
+      ✕ رفض الحجز
+    </button>
+  </div>
+)}
+
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+)}
+
 {/* Offer Delete Confirmation Modal */}
 {showOfferDeleteModal && (
   <div className="delete-modal-overlay">

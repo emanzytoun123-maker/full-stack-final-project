@@ -1179,3 +1179,51 @@
     padding: 18px;
   }
 }
+
+/* Reservation Actions */
+
+.reservation-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #edf0f5;
+}
+
+.reservation-confirm-btn,
+.reservation-reject-btn {
+  flex: 1;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 9px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.reservation-confirm-btn {
+  background: #e8f8ed;
+  color: #168348;
+}
+
+.reservation-confirm-btn:hover {
+  background: #168348;
+  color: white;
+}
+
+.reservation-reject-btn {
+  background: #fff0ed;
+  color: #d94335;
+}
+
+.reservation-reject-btn:hover {
+  background: #d94335;
+  color: white;
+}
+
+@media (max-width: 500px) {
+  .reservation-actions {
+    flex-direction: column;
+  }
+}

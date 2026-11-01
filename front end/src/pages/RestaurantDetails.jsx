@@ -189,6 +189,57 @@ const handleReservation = async (e) => {
 
               </div>
 
+
+<div className="reservation-section">
+  <h2>احجز طاولتك 🪑</h2>
+  <p>اختار الموعد المناسب وعدد الأشخاص.</p>
+
+  {reservationMessage && (
+    <div className="reservation-success">
+      {reservationMessage}
+    </div>
+  )}
+
+  {reservationError && (
+    <div className="reservation-error">
+      {reservationError}
+    </div>
+  )}
+
+  <form onSubmit={handleReservation}>
+    <label>تاريخ الحجز</label>
+    <input
+      type="date"
+      value={reservationDate}
+      min={new Date().toLocaleDateString('en-CA')}
+      onChange={(e) => setReservationDate(e.target.value)}
+      required
+    />
+
+    <label>وقت الحجز</label>
+    <input
+      type="time"
+      value={reservationTime}
+      onChange={(e) => setReservationTime(e.target.value)}
+      required
+    />
+
+    <label>عدد الأشخاص</label>
+    <input
+      type="number"
+      min="1"
+      value={peopleCount}
+      onChange={(e) => setPeopleCount(e.target.value)}
+      required
+    />
+
+    <button type="submit" disabled={reservationLoading}>
+      {reservationLoading ? 'جاري إرسال الحجز...' : 'تأكيد الحجز'}
+    </button>
+  </form>
+</div>
+
+
             </div>
           </div>
         )}
