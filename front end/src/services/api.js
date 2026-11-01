@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+ baseURL: 'https://full-stack-final-project-hj6o.onrender.com',
 })
 
 export const getRestaurants = async () => {
