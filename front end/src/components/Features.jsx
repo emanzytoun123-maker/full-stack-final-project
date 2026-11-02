@@ -18,14 +18,7 @@ const features = [
     button: 'شوف العروض',
     color: 'orange',
   },
-  {
-    icon: '🥳',
-    title: 'خطط طلعتك',
-    description: 'اجمع أصحابك واقترحوا مطاعم وصوّتوا سوا.',
-    link: '/outings',
-    button: 'يلا نخطط',
-    color: 'green',
-  },
+  ,
 ]
 
 function Features() {
